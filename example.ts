@@ -1,7 +1,7 @@
-import { NanoTsDb } from "./mod.ts";
+import { NanoTsDb } from "https://deno.land/x/nanotsdb@v1.0.0/mod.ts";
 
 /* ===== CREATE A NEW DB INSTANCE ===== */
-const pets = new NanoTsDb({ filePath: "./pets.json" }); // or 'new SimpleDB();' to create a database with the default name "pets.json"
+const pets = new NanoTsDb({ filePath: "./pets.json" });
 await pets.connect(); //! Required in order to create the JSON file or retrieve saved data
 
 /* ===== INSERT ===== */

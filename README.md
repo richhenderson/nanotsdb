@@ -11,10 +11,11 @@ Ensure you run with the flags: `deno run --allow-read=./ --allow-write=./ myApp.
 ### Examples
 
 ```ts
-import { NanoTsDb } from './mod.ts';
+import { NanoTsDb } from 'https://deno.land/x/nanotsdb@v1.0.0/mod.ts';
 
 /* ===== CREATE A NEW DB INSTANCE ===== */
-const pets = new NanoTsDb({ filePath: './pets.json' }); // or 'new SimpleDB();' to create a database with the default name "pets.json"
+const pets = new NanoTsDb({ filePath: `${Deno.cwd()}/pets.json` });
+// or 'new NanoTsDb();' to create a database with the default name "db.json"
 await pets.connect(); //! Required in order to create the JSON file or retrieve saved data
 
 /* ===== INSERT ===== */
