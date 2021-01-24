@@ -1,26 +1,13 @@
-# nanoTsDb
-
-NanoTsDb is a tiny JSON based database in Typescript for Deno based on [SimpleDB](https://deno.land/x/simpledb), but since the repository for that is no longer available and some of the types were causing me some errors, I have made some changes.
-
-## How to use
-
-### Required flags
-
-Ensure you run with the flags: `deno run --allow-read=./ --allow-write=./ myApp.ts`
-
-### Examples
-
-```ts
-import { NanoTsDb } from './mod.ts';
+import { NanoTsDb } from "./mod.ts";
 
 /* ===== CREATE A NEW DB INSTANCE ===== */
-const pets = new NanoTsDb({ filePath: './pets.json' }); // or 'new SimpleDB();' to create a database with the default name "pets.json"
+const pets = new NanoTsDb({ filePath: "./pets.json" }); // or 'new SimpleDB();' to create a database with the default name "pets.json"
 await pets.connect(); //! Required in order to create the JSON file or retrieve saved data
 
 /* ===== INSERT ===== */
 const rover = await pets.insert({
-  name: 'Rover',
-  type: 'Dog',
+  name: "Rover",
+  type: "Dog",
   age: 4,
   trained: true,
 });
@@ -32,26 +19,22 @@ Logs to console:
 */
 
 // add some more pets...
-[
-  {
-    name: 'Rex',
-    type: 'Dog',
-    age: 7,
-    trained: true,
-  },
-  {
-    name: 'Fluffy',
-    type: 'Dog',
-    age: 0.1,
-    trained: false,
-  },
-  {
-    name: 'Cuddles',
-    type: 'Cat',
-    age: 10,
-    trained: true,
-  },
-].forEach(async (pet) => {
+[{
+  name: "Rex",
+  type: "Dog",
+  age: 7,
+  trained: true,
+}, {
+  name: "Fluffy",
+  type: "Dog",
+  age: 0.1,
+  trained: false,
+}, {
+  name: "Cuddles",
+  type: "Cat",
+  age: 10,
+  trained: true,
+}].forEach(async (pet) => {
   await pets.insert(pet);
 });
 
@@ -93,7 +76,7 @@ Logs to console:
 */
 
 /* ===== FIND SOME ===== */
-const dogs = await pets.find({ type: 'Dog' });
+const dogs = await pets.find({ type: "Dog" });
 console.log(dogs);
 /*
 Logs to console:
@@ -124,10 +107,10 @@ Logs to console:
 
 /* ===== FIND ONE ===== */
 const findOne = await pets.findOne({
-  name: 'Rover',
+  name: "Rover",
 });
 
-if (findOne === undefined) console.log('Not found!');
+if (findOne === undefined) console.log("Not found!");
 else console.log(findOne);
 /*
 Logs to console:
@@ -137,19 +120,16 @@ Logs to console:
 /* ===== EXISTS ===== */
 console.log(
   await pets.exists({
-    name: 'Rover',
-  })
+    name: "Rover",
+  }),
 ); // true
 
 /* ===== FIND ONE AND UPDATE ===== */
-const updated = await pets.findOneAndUpdate(
-  {
-    name: 'Rover',
-  },
-  {
-    age: 5,
-  }
-);
+const updated = await pets.findOneAndUpdate({
+  name: "Rover",
+}, {
+  age: 5,
+});
 await pets.save();
 console.log(updated);
 /*
@@ -160,14 +140,9 @@ Logs to console:
 /* ===== DELETE ===== */
 if (
   await pets.delete({
-    name: 'Rover',
+    name: "Rover",
   })
 ) {
   await pets.save();
-  console.log('Successfully deleted!');
+  console.log("Successfully deleted!");
 }
-```
-
-## Disclaimer
-
-This is fine for prototyping a quick proof of concept but you should probably use a real database for production applications.
