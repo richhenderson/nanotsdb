@@ -1,17 +1,19 @@
 // import { NanoTsDb } from "https://deno.land/x/nanotsdb@v1.1.0/mod.ts";
 import { NanoTsDb } from "./mod.ts";
 /* ===== CREATE A NEW DB INSTANCE ===== */
-const pets = new NanoTsDb({ filePath: "./pets.json" });
+const pets = new NanoTsDb({
+  filePath: "./pets.json",
+  autosave: true,
+});
 await pets.connect(); //! Required in order to create the JSON file or retrieve saved data
 
 /* ===== INSERT ===== */
-const rover = await pets.insertOne({
+const rover = await pets.insert({
   name: "Rover",
   type: "Dog",
   age: 4,
   trained: true,
 });
-await pets.save();
 console.log(rover);
 /*
 Logs to console:
@@ -35,7 +37,6 @@ await pets.insertMany([{
   age: 10,
   trained: true,
 }]);
-await pets.save();
 
 /* ===== FIND ALL ===== */
 const allPets = await pets.find();
@@ -129,7 +130,6 @@ const updated = await pets.findOneAndUpdate({
 }, {
   age: 5,
 });
-await pets.save();
 console.log(updated);
 /*
 Logs to console:
@@ -142,6 +142,5 @@ if (
     name: "Rover",
   })
 ) {
-  await pets.save();
   console.log("Successfully deleted!");
 }

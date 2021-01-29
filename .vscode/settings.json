@@ -13,4 +13,7 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "denoland.vscode-deno",
   },
+  "cSpell.ignoreWords": [
+    "autosave"
+  ],
 }

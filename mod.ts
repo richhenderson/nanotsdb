@@ -1,8 +1,6 @@
 interface DatabaseConfig {
-  /*
-	 * Path to the database file.
-	*/
   filePath: string;
+  autosave?: boolean;
 }
 
 export class NanoTsDb {
@@ -10,11 +8,15 @@ export class NanoTsDb {
   private _connected = false;
   private config: DatabaseConfig = {
     filePath: `${Deno.cwd()}/db.json`,
+    autosave: false,
   };
 
   constructor(config?: DatabaseConfig) {
-    if (typeof config !== "undefined") {
-      this.config = { ...this.config, ...config };
+    if (config?.filePath) {
+      this.config.filePath = config.filePath;
+    }
+    if (config?.autosave) {
+      this.config.autosave = config.autosave;
     }
   }
 
@@ -30,6 +32,15 @@ export class NanoTsDb {
 
   private findAllDataBy(ob: Record<string, unknown>) {
     return this._data.filter((object) => this.partialContains(object, ob));
+  }
+
+  private getID() {
+    let id = "";
+    do {
+      id = [...Array(24)].map(() => (~~(Math.random() * 36)).toString(36))
+        .join("");
+    } while (this.findIndexBy({ _id: id }) !== -1);
+    return id;
   }
 
   private partialContains(
@@ -90,25 +101,54 @@ export class NanoTsDb {
         this.config.filePath,
         JSON.stringify(this._data, null, 2),
       );
+      return true;
     } catch (e) {
       throw e;
     }
   }
 
-  insert(
+  async insert(
     data: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
-    return new Promise((resolve, reject) => {
-      let id = "";
-      do {
-        id = [...Array(24)].map(() => (~~(Math.random() * 36)).toString(36))
-          .join("");
-      } while (this.findIndexBy({ _id: id }) !== -1);
+    const id = this.getID();
+    data = Object.assign({ _id: id }, data);
+    this._data.push(data);
+    if (this.config.autosave) {
+      await this.save().catch((err) => {
+        throw err;
+      });
+    }
+    return data;
+  }
 
-      data = Object.assign({ _id: id }, data);
-      this._data.push(data);
-      resolve(data);
+  async insertOne(
+    data: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    const id = this.getID();
+    data = Object.assign({ _id: id }, data);
+    this._data.push(data);
+    if (this.config.autosave) {
+      await this.save().catch((err) => {
+        throw err;
+      });
+    }
+    return data;
+  }
+
+  async insertMany(
+    data: Record<string, unknown>[],
+  ): Promise<Record<string, unknown>[]> {
+    const id = this.getID();
+    data.forEach((datum) => {
+      datum = Object.assign({ _id: id }, datum);
+      this._data.push(datum);
     });
+    if (this.config.autosave) {
+      await this.save().catch((err) => {
+        throw err;
+      });
+    }
+    return data;
   }
 
   find(ob?: Record<string, unknown>): Promise<Record<string, unknown>[]> {
@@ -129,28 +169,33 @@ export class NanoTsDb {
     });
   }
 
-  findOneAndUpdate(
+  async findOneAndUpdate(
     ob: Record<string, unknown>,
     replace: Record<string, unknown>,
   ): Promise<Record<string, unknown> | undefined> {
-    return new Promise((resolve, reject) => {
-      const id = this.findIndexBy(ob);
+    const id = this.findIndexBy(ob);
 
-      if (id === -1) return undefined;
+    if (id === -1) return undefined;
 
-      this._data[id] = { ...this._data[id], ...replace };
-
-      resolve(this._data[id]);
-    });
+    this._data[id] = { ...this._data[id], ...replace };
+    if (this.config.autosave) {
+      await this.save().catch((err) => {
+        throw err;
+      });
+    }
+    return this._data[id];
   }
 
-  delete(ob: Record<string, unknown>): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const result = this.findIndexBy(ob);
-      if (result === -1) resolve(false);
-      this._data.splice(result, 1);
-      resolve(true);
-    });
+  async delete(ob: Record<string, unknown>): Promise<boolean> {
+    const result = this.findIndexBy(ob);
+    if (result === -1) return false;
+    this._data.splice(result, 1);
+    if (this.config.autosave) {
+      await this.save().catch((err) => {
+        throw err;
+      });
+    }
+    return true;
   }
 
   exists(ob: Record<string, unknown>): boolean {
